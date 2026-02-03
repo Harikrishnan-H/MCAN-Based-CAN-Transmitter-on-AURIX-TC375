@@ -1,0 +1,38 @@
+The device features of TC375TP are not fully unlocked. See https://kb.tasking.com/KB/76/Article/521
+LOADING	App
+LOADING	D:\ASE\WS25\Microcontroller\Project\Project_4-1_Harikrishnan_Haridas\WS_AURIX_Project_4-1_CAN_Tx_ADC\AURIX_Project_4-1_CAN_Tx_ADC\TriCore Debug (TASKING)\AURIX_Project_4-1_CAN_Tx_ADC.elf
+EMULATION	Probe - System; Root
+EMULATION	Initial debug frequency set
+EMULATION	Asserting reset
+EMULATION	Finished connecting to SoC
+EMULATION	Releasing reset
+EMULATION	Initialization script (if any) done
+No RAM which needs initialization found
+EMULATION	Final debug frequency set
+EMULATION	SoC identification match OK
+SoC	Detected device: TC370 series, rev. AA
+EMULATION	STARTED
+PROGRAMMING 	190716 bytes
+Image checker	Startup address check is disabled.
+PROGRAMMING	Infineon TC37x_PFLASH_6MB (14 sectors)
+EMULATION	END - Without cleanup
+EMULATION	Initial debug frequency set
+EMULATION	Asserting reset
+EMULATION	Finished connecting to SoC
+EMULATION	Releasing reset
+EMULATION	Initialization script (if any) done
+EMULATION	Final debug frequency set
+EMULATION	SoC identification match OK
+SoC	Detected device: TC370 series, rev. AA
+EMULATION	STARTED
+EMULATION	END - Without cleanup
+EMULATION	Initial debug frequency set
+EMULATION	Asserting reset
+EMULATION	Finished connecting to SoC
+EMULATION	Releasing reset
+EMULATION	Initialization script (if any) done
+EMULATION	Final debug frequency set
+EMULATION	SoC identification match OK
+SoC	Detected device: TC370 series, rev. AA
+EMULATION	STARTED
+EMULATION	END - Without cleanup

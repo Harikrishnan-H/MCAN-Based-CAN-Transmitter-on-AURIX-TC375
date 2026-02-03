@@ -1,0 +1,469 @@
+/*
+ * TC375_MCAN_functions.c
+ *
+ *  Created on: 24 Jan 2026
+ *      Author: harik
+ */
+/*********************************************************************************************************************/
+/*--------------------------------------------------Documentation----------------------------------------------------*/
+/*********************************************************************************************************************/
+
+/*
+ * The code in this file shall provide the following functionalities:
+ *
+ * switching on the clocks for the MCAN module and for the CAN communication.
+ *
+ * set MCAN init to on
+ * set MCAN init to off
+ *
+ * set MCAN control
+ *
+ * set the Nominal Baud rate
+ * set the Data Baud rate
+ *
+ * initialize the IO ports for the CAN0 and CAN1 interfaces
+ *
+ */
+
+/*
+ * status: V01.1 2025-12-13
+ */
+
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Defines-------------------------------------------------------*/
+/*********************************************************************************************************************/
+
+
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Includes------------------------------------------------------*/
+/*********************************************************************************************************************/
+
+/*
+ * IfxPort_reg.h includes the definitions of the Infineon iLLDs for access to ports, peripherals, etc.
+ */
+
+#include <Level_04_HAL/HAL_Libraries/HAL_Return_Types.h>
+#include <Level_Libraries/iLLD/TC37A/Tricore/Cpu/Std/Platform_Types.h>
+
+#include <Level_Libraries/iLLD/TC37A/Tricore/CAN/Std/IfxCan.h>
+#include <Level_Libraries/Infra/Sfr/TC37A/_Reg/IfxCan_reg.h>
+
+#include <Level_04_HAL/TC375_MCAN/TC375_MCAN.h>
+
+#include <Level_04_HAL/TC375_SCU/TC375_SCU_WDT_functions.h>
+
+
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Externals-----------------------------------------------------*/
+/*********************************************************************************************************************/
+
+extern CAN_Module0_MsgRAM_struct *ptr_MCAN0_MsgRAM;
+
+extern HAL_Return_Type Func_Port_20_Pin_8_init (void);
+extern HAL_Return_Type Func_Port_20_Pin_7_init (void);
+extern HAL_Return_Type Func_Port_20_Pin_6_init (void);
+
+
+/*********************************************************************************************************************/
+/*-------------------------------------------------Global variables--------------------------------------------------*/
+/*********************************************************************************************************************/
+
+
+
+/*********************************************************************************************************************/
+/*---------------------------------------------Function Implementations----------------------------------------------*/
+/*********************************************************************************************************************/
+
+/*********************************************************************************************************************/
+/*
+ * function:    Func_set_MCAN0_N0_init_on
+ * returns:     HAL_Return_Type error report
+ * parameters:  void
+ * description: The function enables to access to the CAN Module 0 / CAN Node 0 configuration bits
+ */
+HAL_Return_Type Func_set_MCAN0_N0_init_on (void)
+{
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+    volatile uint32 tmp_uint32;
+
+    /*
+     * set the following control bits:
+     *
+     * CAN0_CCCR0.B.CCCE = 1;
+     * CAN0_CCCR0.B.CI = 1;
+     *
+     */
+    tmp_uint32 = CAN0_CCCR0.U;
+    tmp_uint32 = tmp_uint32 | 0x00000003;
+    CAN0_CCCR0.U = tmp_uint32;
+
+    /*
+     * insert delay read
+     */
+    tmp_uint32 = CAN0_CCCR0.U;
+
+    if((tmp_uint32 & 0x00000003) == 0x00000003)
+    {
+        tmp_HAL = HAL_E_OK;
+    }
+    else
+    {
+        tmp_HAL = HAL_E_NOT_OK;
+    }
+    return tmp_HAL;
+}
+
+
+/*********************************************************************************************************************/
+/*
+ * function:    Func_set_MCAN0_N0_init_off
+ * returns:     HAL_Return_Type error report
+ * parameters:  void
+ * description: The function disables to access to the CAN Module 0 / CAN Node 0 configuration bits
+ */
+HAL_Return_Type Func_set_MCAN0_N0_init_off (void)
+{
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+    volatile uint32 tmp_uint32;
+
+    /*
+     * set the following control bits:
+     *
+     * CAN0_CCCR0.B.CCCE = 0;
+     * CAN0_CCCR0.B.CI = 0;
+     *
+     */
+    tmp_uint32 = CAN0_CCCR0.U;
+    tmp_uint32 = tmp_uint32 & 0xFFFFFFFC;
+    CAN0_CCCR0.U = tmp_uint32;
+
+    /*
+     * insert delay read
+     */
+    tmp_uint32 = CAN0_CCCR0.U;
+
+    if((tmp_uint32 & 0x00000003) == 0x0)
+    {
+        tmp_HAL = HAL_E_OK;
+    }
+    else
+    {
+        tmp_HAL = HAL_E_NOT_OK;
+    };
+    return tmp_HAL;
+}
+
+
+/*********************************************************************************************************************/
+/*
+ * function:    Func_switch_MCAN0_N0_clock_on
+ * returns:     HAL_Return_Type error report
+ * parameters:  void
+ * description: The function switches both clocks for CAN Node 0 on
+ */
+HAL_Return_Type Func_switch_MCAN0_N0_clock_on (void)
+{
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+    volatile uint32 tmp_uint32;
+
+    tmp_uint32 = CAN0_MCR.U;
+
+    /*
+     * set the following control bits:
+     *
+     * CAN0_MCR.B.CCCE = 1;
+     * CAN0_MCR.B.CI = 1;
+     * CAN0_MCR.B.CLKSEL0 = 0x3; // set both clocks of Node0 to on
+     */
+    tmp_uint32 = tmp_uint32 | (0xC0000000 | 0x00000003);
+    CAN0_MCR.U = tmp_uint32;
+
+    /*
+     * clear the following control bits:
+     *
+     CAN0_MCR.B.CCCE = 0;
+     CAN0_MCR.B.CI = 0;
+     */
+    tmp_uint32 = CAN0_MCR.U & (~0xC0000000);
+    CAN0_MCR.U = tmp_uint32;
+
+    /*
+     * insert delay
+     */
+    tmp_uint32 = CAN0_MCR.U;
+
+    if ( (  (tmp_uint32 & 0xC0000000) == 0x0) && ( (tmp_uint32 & 0x00000003) == 0x3) )
+    {
+        tmp_HAL = HAL_E_OK;
+    }
+    else
+    {
+        tmp_HAL = HAL_E_NOT_OK;
+    }
+
+    return tmp_HAL;
+}
+
+
+/*********************************************************************************************************************/
+/*
+ * function:    Func_run_MCAN0_RAM_init
+ * returns:     HAL_Return_Type error report
+ * parameters:  void
+ * description: The function runs an initialization sequence for CAN Module 0 RAM
+ */
+HAL_Return_Type Func_run_MCAN0_RAM_init (void)
+{
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+    volatile uint32 tmp_uint32;
+    volatile boolean init_busy = TRUE;
+
+    /*
+     * set the following control bits:
+     *
+     * CAN0_MCR.B.CCCE = 1;
+     * CAN0_MCR.B.CI = 1;
+     */
+
+    tmp_uint32 = CAN0_MCR.U | 0xC0000000;
+    CAN0_MCR.U = tmp_uint32;
+
+    do
+    {
+        if (CAN0_MCR.B.RBUSY == 0x0)
+        {
+            init_busy = FALSE;
+        }
+        else
+        {
+            init_busy = TRUE;
+        }
+    } while (init_busy == TRUE);
+
+    CAN0_MCR.B.RINIT = 0x0;
+    CAN0_MCR.B.RINIT = 0x1;
+
+    tmp_uint32 = CAN0_MCR.U;
+
+    do
+    {
+        if (CAN0_MCR.B.RBUSY == 0x0)
+        {
+            init_busy = FALSE;
+        }
+        else
+        {
+            init_busy = TRUE;
+        }
+    } while (init_busy == TRUE);
+
+    CAN0_MCR.B.RINIT = 0x0;
+
+    /*
+     * clear the following control bits:
+     *
+     CAN0_MCR.B.CCCE = 0;
+     CAN0_MCR.B.CI = 0;
+     */
+    tmp_uint32 = CAN0_MCR.U & (~0xC0000000);
+    CAN0_MCR.U = tmp_uint32;
+
+    tmp_HAL = HAL_E_OK;
+
+    return tmp_HAL;
+}
+
+
+
+/*********************************************************************************************************************/
+/*
+ * function:    Func_set_MCAN0_N0_control
+ * returns:     HAL_Return_Type error report
+ * parameters:  void
+ * description: The function sets the CAN0 controls and starts the initialization procedure
+ */
+HAL_Return_Type Func_set_MCAN0_N0_control (void)
+{
+    uint32 tmp_uint32;
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+
+    /*
+     * enable initialization
+     */
+
+    CAN0_CCCR0.B.INIT = 0x1;
+    /*
+     * insert delay read
+     */
+    tmp_uint32 = CAN0_CCCR0.U;
+    CAN0_CCCR0.B.CCE  = 0x1;
+
+    /*
+     * the CAN Node 0 will be set to CAN Standard mode (no FD support)
+     */
+    CAN0_CCCR0.B.NISO = 0x0;
+    CAN0_CCCR0.B.TXP  = 0x0;
+    CAN0_CCCR0.B.EFBI = 0x0;
+    CAN0_CCCR0.B.PXHD = 0x0;
+    CAN0_CCCR0.B.BRSE = 0x0; // bit rate switching disabled
+    CAN0_CCCR0.B.FDOE = 0x0; // FD operation disabled
+    CAN0_CCCR0.B.TEST = 0x0;
+    CAN0_CCCR0.B.DAR  = 0x0; // automatic retransmission enabled
+    CAN0_CCCR0.B.MON  = 0x0;
+    CAN0_CCCR0.B.CSR  = 0x0; // no clock stop request
+    CAN0_CCCR0.B.ASM  = 0x0;
+
+    CAN0_CCCR0.B.INIT = 0x0;
+
+    tmp_HAL = HAL_E_OK;
+    return tmp_HAL;
+}
+
+
+/*********************************************************************************************************************/
+/*
+ * function:    Func_set_MCAN0_N0_Nominal_Baudrate
+ * returns:     HAL_Return_Type error report
+ * parameters:  void
+ * description: The function sets the Nominal Baud rate, which is used for the CAN header etc.
+ */
+HAL_Return_Type Func_set_MCAN0_N0_Nominal_Baudrate (void)
+{
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+
+    Func_set_MCAN0_N0_init_on();
+
+    /*
+     * set time quantum values for Nominal Baud rate
+     * communication input clock is 80 Mhz, is reduced to 20 Mhz; divisor has to be 4 -> bit field NBRP -> 3
+     * Phase Segment 1 and Prop Segment are accumulated to one value; NTSEG1 bitfield -> set to 8 + 21 -> 29;
+     * Phase Segment 2 is calculated to 9; is set to 8
+     * Sync Jump Width is calculated to 9; is set to 8
+     *
+     */
+    CAN0_NBTP0.B.NBRP   = 0x3;
+    CAN0_NBTP0.B.NTSEG1 = 29;
+    CAN0_NBTP0.B.NTSEG2 = 8;
+    CAN0_NBTP0.B.NSJW   = 8;
+
+    Func_set_MCAN0_N0_init_off();
+
+    tmp_HAL = HAL_E_OK;
+    return tmp_HAL;
+}
+
+
+/*********************************************************************************************************************/
+/*
+ * function:    Func_set_MCAN0_N0_Data_Baudrate
+ * returns:     HAL_Return_Type error report
+ * parameters:  void
+ * description: The function sets the Data Baud rate, which is used for the CAN data.
+ */
+HAL_Return_Type Func_set_MCAN0_N0_Data_Baudrate (void)
+{
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+
+    Func_set_MCAN0_N0_init_on();
+
+    /*
+     * set time quantum values for Data Baud rate
+     * communication input clock is 80 Mhz, is reduced to 20 Mhz; divisor has to be 4 -> bit field DBRP -> 3
+     * Phase Segment 1 and Prop Segment are accumulated to one value; DTSEG1 bitfield -> set to 8 + 21 -> 29;
+     * Phase Segment 2 is calculated to 9; is set to 8
+     * Sync Jump Width is calculated to 9; is set to 8
+     * Transmitter Delay Compensation is disabled
+     *
+     */
+    CAN0_DBTP0.B.DBRP   = 0x3;
+    CAN0_DBTP0.B.DTSEG1 = 29;
+    CAN0_DBTP0.B.DTSEG2 = 8;
+    CAN0_DBTP0.B.DSJW   = 8;
+    CAN0_DBTP0.B.TDC    = 0x0;
+
+    Func_set_MCAN0_N0_init_off();
+
+    tmp_HAL = HAL_E_OK;
+    return tmp_HAL;
+}
+
+
+/*********************************************************************************************************************/
+/*
+ * function:    Func_MCAN0_N0_Port_connection_init
+ * returns:     HAL_Return_Type error report
+ * parameters:  void
+ * description: The function initializes the connection of MCAN0 module CAN N0 of  to IO ports
+ */
+HAL_Return_Type Func_MCAN0_N0_Port_connection_init (void)
+{
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+
+    /*
+     * MCAN Module 0 CAN Channel 0 is connected to:
+     * TxD to P20.8
+     * RxDB to P20.7
+     *
+     * Note: to enable the transceiver, the IO Port P20.6 must be driven to low.
+     */
+    CAN0_NPCR0.B.RXSEL = 0x1;
+
+
+    /*
+       * Initialize CAN0 pins on Port 20
+       * P20.8 -> TXD
+       * P20.7 -> RXDB
+       * P20.6 -> STB (LOW = transceiver enabled)
+       */
+
+      if (Func_Port_20_Pin_8_init() == HAL_E_OK)
+      {
+          if (Func_Port_20_Pin_7_init() == HAL_E_OK)
+          {
+              if (Func_Port_20_Pin_6_init() == HAL_E_OK)
+              {
+                  tmp_HAL = HAL_E_OK;
+              }
+          }
+      }
+
+
+    return tmp_HAL;
+}
+
+
+HAL_Return_Type Func_MCAN0_N0_TxBuffer0_Send_u16(uint16 value)
+{
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+
+    /*
+     * Do not overwrite TX buffer 0 if it is still pending
+     */
+    if (CAN0_N0_TX_BRP.B.TRP0 == 0)
+    {
+        /*
+         * Write 2 bytes into TX buffer 0 (little endian)
+         */
+        ptr_MCAN0_MsgRAM->Region_CAN0_Tx_Buffers[0].Tx_data_Buffer[0] = (uint8)(value & 0xFF);
+        ptr_MCAN0_MsgRAM->Region_CAN0_Tx_Buffers[0].Tx_data_Buffer[1] = (uint8)((value >> 8) & 0xFF);
+
+        /*
+         * Trigger transmission request for TX buffer 0
+         */
+        CAN0_N0_TX_BAR.B.AR0 = 1;
+
+        /* Check: did MCAN accept the request? */
+               if (CAN0_N0_TX_BRP.B.TRP0 == 1)
+               {
+                   tmp_HAL = HAL_E_OK;   /* Transmission attempt started */
+               }
+           }
+
+
+        //tmp_HAL = HAL_E_OK;
+    }
+
+    return tmp_HAL;
+}
+
+

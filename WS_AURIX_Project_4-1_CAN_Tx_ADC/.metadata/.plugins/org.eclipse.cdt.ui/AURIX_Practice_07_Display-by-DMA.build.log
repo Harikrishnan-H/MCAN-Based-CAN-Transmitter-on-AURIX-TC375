@@ -1,0 +1,18 @@
+23:17:21 **** Incremental Build of configuration TriCore Debug (TASKING) for project AURIX_Practice_07_Display-by-DMA ****
+amk -j16 all 
+TASKING VX-toolset for AURIX Development Studio (non-commercial): program builder v1.1r8 Build 22011964
+Building target: AURIX_Practice_07_Display-by-DMA.elf
+Invoking: TASKING Linker
+cctc -f .AURIX_Practice_07_Display-by-DMA.elf.opt
+Finished building target: AURIX_Practice_07_Display-by-DMA.elf
+ 
+Invoking: Print Size
+elfsize  "AURIX_Practice_07_Display-by-DMA.elf"
+Total sizes:
+ROM: 0x2e9f0 (190960) = code: 0x24de4 (151012) + romdata: 0x9c0c (39948)
+RAM: 0x14960 (84320) = data + bss
+Finished building: AURIX_Practice_07_Display-by-DMA.siz
+ 
+
+23:17:25 Build Finished. 0 errors, 0 warnings. (took 4s.116ms)
+

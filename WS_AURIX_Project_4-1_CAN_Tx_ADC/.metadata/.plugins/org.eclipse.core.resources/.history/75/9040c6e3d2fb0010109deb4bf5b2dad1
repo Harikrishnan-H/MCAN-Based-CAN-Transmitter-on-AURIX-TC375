@@ -1,0 +1,33 @@
+/*
+ * Task_MCAN_Tx.c
+ *
+ *  Created on: 24 Jan 2026
+ *      Author: harik
+ */
+
+#include "FreeRTOS.h"
+#include "task.h"
+
+#include <Level_02_Interfaces/Interface_Libraries/L02_Return_Types.h>
+#include <Level_Libraries/iLLD/TC37A/Tricore/Cpu/Std/Platform_Types.h>
+
+extern volatile uint16 conv_result_stable;
+
+extern L02_Return_Type IF_MCAN_Init(void);
+extern L02_Return_Type IF_MCAN_Send_u16(uint16 value);
+
+void task_MCAN_Tx(void *arg)
+{
+    IF_MCAN_Init();
+
+    TickType_t lastWakeTime = xTaskGetTickCount();
+
+    while (TRUE)
+    {
+        IF_MCAN_Send_u16(conv_result_stable);
+        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(500));
+    }
+
+    vTaskDelete(NULL);
+}
+

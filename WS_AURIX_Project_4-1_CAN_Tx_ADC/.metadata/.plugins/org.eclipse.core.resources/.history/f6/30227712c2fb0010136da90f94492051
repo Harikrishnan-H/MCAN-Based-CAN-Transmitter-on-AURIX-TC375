@@ -1,0 +1,81 @@
+/*
+ * TC375_MCAN.h
+ *
+ *  Created on: 24 Jan 2026
+ *      Author: harik
+ */
+
+#ifndef LEVEL_04_HAL_TC375_MCAN_TC375_MCAN_H_
+#define LEVEL_04_HAL_TC375_MCAN_TC375_MCAN_H_
+
+
+
+
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Includes------------------------------------------------------*/
+/*********************************************************************************************************************/
+
+#include <Level_04_HAL/HAL_Libraries/HAL_Return_Types.h>
+
+#include <Level_Libraries/iLLD/TC37A/Tricore/Cpu/Std/Platform_Types.h>
+#include <Level_Libraries/Infra/Platform/Tricore/Compilers/CompilerTasking.h>
+
+#include <Level_Libraries/Infra/Sfr/TC37A/_Reg/IfxCan_reg.h>
+#include <Level_Libraries/Infra/Sfr/TC37A/_Reg/IfxScu_reg.h>
+
+
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Defines-------------------------------------------------------*/
+/*********************************************************************************************************************/
+
+#define Size_data_Buffer            8
+#define Size_data_Buffer_indexed    0x0;    // for register RXESC0 and TXESC0
+#define Count_Std_Filters           2
+#define Count_Rx_Buffers            2
+#define Count_Tx_Buffers            1
+
+
+/*
+ * definition of CAN Message ID (Identifier) types
+ */
+typedef enum
+{
+      Standard_ID = 0,
+      Extended_ID,
+      Std_and_Ext_ID
+} MCAN_ID_type;
+
+
+typedef struct _CAN_Rx_Buffer_struct
+{
+        Ifx_CAN_R0_Bits Rx_Buffer_R0;
+        Ifx_CAN_R1_Bits Rx_Buffer_R1;
+        uint8           Rx_data_Buffer[Size_data_Buffer];
+} CAN_Rx_Buffer_struct;
+
+
+typedef struct _CAN_Tx_Buffer_struct
+{
+        Ifx_CAN_TXMSG_T0_Bits   Tx_Buffer_T0;
+        Ifx_CAN_TXMSG_T1_Bits   Tx_Buffer_T1;
+        uint8                   Tx_data_Buffer[Size_data_Buffer];
+} CAN_Tx_Buffer_struct;
+
+
+typedef struct _CAN_Module0_MsgRAM_struct
+{
+        Ifx_CAN_STDMSG_S0_Bits  Region_CAN0_Standard_Filter[Count_Std_Filters];
+        CAN_Rx_Buffer_struct    Region_CAN0_Rx_Buffers[Count_Rx_Buffers];
+        CAN_Tx_Buffer_struct    Region_CAN0_Tx_Buffers[Count_Tx_Buffers];
+        Ifx_CAN_STDMSG_S0_Bits  Region_CAN1_Standard_Filter[Count_Std_Filters];
+        CAN_Rx_Buffer_struct    Region_CAN1_Rx_Buffers[Count_Rx_Buffers];
+        CAN_Tx_Buffer_struct    Region_CAN1_Tx_Buffers[Count_Tx_Buffers];
+
+} CAN_Module0_MsgRAM_struct;
+
+
+
+
+
+
+#endif /* LEVEL_04_HAL_TC375_MCAN_TC375_MCAN_H_ */

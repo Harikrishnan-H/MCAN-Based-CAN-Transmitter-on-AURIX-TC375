@@ -1,0 +1,115 @@
+/*
+ * Task_EVADC_Conversions.c
+ *
+ *  Created on: 23 Jan 2026
+ *      Author: hari
+ */
+
+/*********************************************************************************************************************/
+/*--------------------------------------------------Documentation----------------------------------------------------*/
+/*********************************************************************************************************************/
+/*
+ *  The task runs the EVADC on TC375.
+ *
+ */
+
+
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Includes------------------------------------------------------*/
+/*********************************************************************************************************************/
+
+#include <Level_02_Interfaces/Interface_Libraries/L02_Return_Types.h>
+#include <Level_Libraries/iLLD/TC37A/Tricore/Cpu/Std/Platform_Types.h>
+
+#include "FreeRTOS.h"
+#include "task.h"
+
+
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Defines-------------------------------------------------------*/
+/*********************************************************************************************************************/
+
+
+
+/*********************************************************************************************************************/
+/*-----------------------------------------------------Externals-----------------------------------------------------*/
+/*********************************************************************************************************************/
+
+extern L02_Return_Type Func_Adapter_VoltDivider_init(void);
+
+extern L02_Return_Type Func_EVADC_G3RES0_check(boolean *valid);
+extern L02_Return_Type Func_return_G3C0_conv_result(uint16 *result);
+
+/*********************************************************************************************************************/
+/*-------------------------------------------------Global variables--------------------------------------------------*/
+/*********************************************************************************************************************/
+
+volatile uint16 conv_result;
+volatile uint16 conv_result_stable;
+
+/*********************************************************************************************************************/
+/*---------------------------------------------Function Implementations----------------------------------------------*/
+/*********************************************************************************************************************/
+/*
+ *
+ */
+void task_EVADC_Conversion(void *arg)
+{
+    L02_Return_Type tmp_L02;
+    boolean valid = FALSE;
+
+    /*
+     * initialize the interface to EVADC Group3
+     */
+    tmp_L02 = Func_Adapter_VoltDivider_init();
+
+    /* Initialize delay reference ONCE */
+       TickType_t lastWakeTime = xTaskGetTickCount();
+
+    /*
+     * the EVADC runs
+     */
+
+    while (TRUE)
+    {
+        tmp_L02 = Func_EVADC_G3RES0_check(&valid);
+
+        if (valid == TRUE)
+        {
+            static uint16 stable_result;
+            static uint8 init = 0;
+            uint16 deadband = 16;
+
+            Func_return_G3C0_conv_result(&conv_result);
+
+            if (!init)
+            {
+                stable_result = conv_result;
+                init = 1;
+            }
+            else
+            {
+                if ((sint32)conv_result - (sint32)stable_result >= deadband || (sint32)stable_result - (sint32)conv_result >= deadband)
+                {
+                    stable_result = conv_result;
+                }
+            }
+
+            conv_result_stable = stable_result;
+
+        }
+
+        /* Run exactly every 10 ms */
+        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(10));
+    }
+
+
+
+    /*
+     * The task shall never arrive at this point. If yes it will be deleted.
+     */
+    vTaskDelete( NULL );
+}
+
+
+

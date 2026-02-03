@@ -1,0 +1,105 @@
+/*
+ * IF_MCAN.c
+ *
+ *  Created on: 24 Jan 2026
+ *      Author: harik
+ */
+
+#include <Level_02_Interfaces/Interface_Libraries/L02_Return_Types.h>
+#include <Level_04_HAL/HAL_Libraries/HAL_Return_Types.h>
+#include <Level_Libraries/iLLD/TC37A/Tricore/Cpu/Std/Platform_Types.h>
+
+//DEBUG LINES START
+volatile uint32 g_mcan_trace = 0x11111111U;
+//DEBUG LINES END
+
+
+
+extern HAL_Return_Type Func_MCAN0_Module_init(void);
+extern HAL_Return_Type Func_switch_MCAN0_N0_clock_on(void);
+extern HAL_Return_Type Func_run_MCAN0_RAM_init(void);
+
+extern HAL_Return_Type Func_set_MCAN0_N0_init_on(void);
+extern HAL_Return_Type Func_set_MCAN0_N0_init_off(void);
+
+extern HAL_Return_Type Func_set_MCAN0_N0_control(void);
+extern HAL_Return_Type Func_set_MCAN0_N0_Nominal_Baudrate(void);
+
+extern HAL_Return_Type Func_set_MCAN0_N0_Data_Baudrate(void);
+
+extern HAL_Return_Type Func_MCAN0_N0_Port_connection_init(void);
+
+extern HAL_Return_Type Func_MsgRAM_init(void);
+extern HAL_Return_Type Func_CAN0_Tx_buffer0_init(uint8 msg_nr);
+
+/* HAL TX  */
+extern HAL_Return_Type Func_MCAN0_N0_TxBuffer0_Send_u16(uint16 value);
+
+
+/*
+ * Interface: Init
+ *  */
+L02_Return_Type IF_MCAN_Init(void)
+{
+    //DEBUG LINES START
+    g_mcan_trace = 0xAAAAAAAAU;
+    //DEBUG LINES end
+
+
+    L02_Return_Type tmp_L02 = L02_E_NOT_OK;
+    HAL_Return_Type tmp_HAL = HAL_E_NOT_OK;
+
+    tmp_HAL = Func_MCAN0_Module_init();
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_switch_MCAN0_N0_clock_on();
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_run_MCAN0_RAM_init();
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_set_MCAN0_N0_init_on();
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_set_MCAN0_N0_control();
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_set_MCAN0_N0_Nominal_Baudrate();
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_set_MCAN0_N0_Data_Baudrate();
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_MCAN0_N0_Port_connection_init();
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_MsgRAM_init();
+
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_CAN0_Tx_buffer0_init(0);
+
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_HAL = Func_set_MCAN0_N0_init_off();
+
+
+
+    if (tmp_HAL == HAL_E_OK) tmp_L02 = L02_E_OK;
+
+    return tmp_L02;
+}
+
+
+/*
+ * Interface: Send 16-bit value
+  */
+L02_Return_Type IF_MCAN_Send_u16(uint16 value)
+{
+    L02_Return_Type tmp_L02 = L02_E_NOT_OK;
+
+    if (Func_MCAN0_N0_TxBuffer0_Send_u16(value) == HAL_E_OK)
+    {
+        tmp_L02 = L02_E_OK;
+    }
+
+    return tmp_L02;
+}

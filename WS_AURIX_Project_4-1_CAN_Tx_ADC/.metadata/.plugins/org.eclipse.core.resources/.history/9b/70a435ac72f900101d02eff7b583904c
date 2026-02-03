@@ -1,0 +1,11 @@
+/*
+ * IF_MCAN.c
+ *
+ *  Created on: 24 Jan 2026
+ *      Author: harik
+ */
+
+#include <Level_02_Interfaces/Interface_Libraries/L02_Return_Types.h>
+#include <Level_04_HAL/HAL_Libraries/HAL_Return_Types.h>
+#include <Level_Libraries/iLLD/TC37A/Tricore/Cpu/Std/Platform_Types.h>
+
